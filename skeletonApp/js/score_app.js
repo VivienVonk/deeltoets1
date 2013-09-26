@@ -1,4 +1,5 @@
 //Namespace aanmaken, scope aanmaken, zodat het niet in de globale scope staat
+//Als score app object bestaat 
 var SCORE_APP = SCORE_APP || {};
 
 //Self invoking function, start vanzelf als je website laadt, zodat eerst alle data wordt geladen met dom ready start je script
@@ -110,8 +111,11 @@ var SCORE_APP = SCORE_APP || {};
     	]}
 	}
 
-	//Kickstart routie
-	SCORE_APP.routing.init();
+	domready(function(){
+		//Kickstart routie
+		SCORE_APP.routing.init();
+	});
+
 
 })();
 
