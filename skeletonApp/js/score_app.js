@@ -57,11 +57,51 @@ var SCORE_APP = SCORE_APP || {};
 			    },
 			    'schedule': function() {
 			    	SCORE_APP.pages.showSchedulePage();
+			    	SCORE_APP.toggle.active('scheduleActive', true);
+			    	SCORE_APP.toggle.active('rankingActive', false);
 			    },
 			    'ranking, *': function() {
 			    	SCORE_APP.pages.showRankingPage();
+			    	SCORE_APP.toggle.active('scheduleActive', false);
+			    	SCORE_APP.toggle.active('rankingActive', true);
 			    }
 			});
+		}
+	}
+
+		SCORE_APP.toggle = {
+		//elementId = string, show = true/false
+		showHide : function (elementId, show){
+			//Element in variabele opslaan
+			var e = document.getElementById(elementId);
+			//De toggle functie. Als show true is, replace de className '' met de class show 
+			//Als how false is, replace dan class show met '' (spatie)
+			if (show) {
+				e.className = e.className.replace('', 'show');
+			} else {
+				e.className = e.className.replace('show', '');
+			}
+		},
+
+		active : function (elementId, active){
+			var e = document.getElementById(elementId);
+
+			if (active) {
+				e.className = e.className.replace('', 'active');
+			} else {
+				e.className= e.className.replace('active', '');
+			}
+		}
+	}
+
+	SCORE_APP.loader = {
+		//Show is een functie waar show true is
+		//Hide is een functie waar show false is, 
+		show : function(){
+			SCORE_APP.toggle.showHide('loader', true);
+		},
+		hide : function(){
+			SCORE_APP.toggle.showHide('loader', false);
 		}
 	}
 
@@ -71,8 +111,9 @@ var SCORE_APP = SCORE_APP || {};
 			SCORE_APP.pages.hideAllPages();
 			//html erin renderen met transparency
 			SCORE_APP.data.getGameData( id, function(gameScore){
-				Transparency.render(document.getElementById('gameContainer'), gameScore);
-                (document.getElementById('gameContainer')).style.display = 'block' ;
+				SCORE_APP.toggle.showHide('gameContainer', true);
+                Transparency.render(document.getElementById('gameContainer'), gameScore);
+                SCORE_APP.loader.hide();
             });
 		},
 
@@ -80,7 +121,7 @@ var SCORE_APP = SCORE_APP || {};
 			SCORE_APP.pages.hideAllPages();
 
 			SCORE_APP.data.getScheduleData( function(scheduleData) {
-                (document.getElementById('scheduleContainer')).style.display = 'block' ;
+                SCORE_APP.toggle.showHide('scheduleContainer', true);
 
                 var directives = {
                 id: {
@@ -100,6 +141,7 @@ var SCORE_APP = SCORE_APP || {};
                     };
 
                 Transparency.render(document.getElementById('scheduleContainer'), scheduleData, directives);
+                SCORE_APP.loader.hide();
             });
 		},
 
@@ -107,15 +149,17 @@ var SCORE_APP = SCORE_APP || {};
 			SCORE_APP.pages.hideAllPages();
 
 			SCORE_APP.data.getPoolData( function(poolData){
+				SCORE_APP.toggle.showHide('rankingContainer', true);
 				Transparency.render(document.getElementById('rankingContainer'), poolData);
-				(document.getElementById('rankingContainer')).style.display = "block" ;
+				SCORE_APP.loader.hide();
 			});
 		},
 
 		hideAllPages : function(){
-			(document.getElementById('gameContainer')).style.display = "none" ;
-			(document.getElementById('scheduleContainer')).style.display = "none" ;
-			(document.getElementById('rankingContainer')).style.display = "none" ;
+			SCORE_APP.toggle.showHide('gameContainer', false);
+			SCORE_APP.toggle.showHide('scheduleContainer', false);
+			SCORE_APP.toggle.showHide('rankingContainer', false);
+
 		}
 	}
 
@@ -136,6 +180,7 @@ var SCORE_APP = SCORE_APP || {};
 
     			//alert('The page contains ' + text.length + ' character(s).');
 			});
+			SCORE_APP.loader.show();
 		},
 
 		getScheduleData : function(callback){
@@ -149,6 +194,7 @@ var SCORE_APP = SCORE_APP || {};
              
                 callback(json.objects);
             });
+            SCORE_APP.loader.show();
         },
 
         getGameData : function(id, callback){
@@ -162,34 +208,8 @@ var SCORE_APP = SCORE_APP || {};
 
                 callback(json);
             });
+            SCORE_APP.loader.show();
         },
-	}
-
-	SCORE_APP.toggle = {
-		//elementId = string, show = true/false
-		showHide : function (elementId, show){
-			//Element in variabele opslaan
-			var e = document.getElementById(elementId);
-			//De toggle functie. Als show true is, replace de className '' met de class show 
-			//Als how false is, replace dan class show met '' (spatie)
-			if (show) {
-				e.className = e.className.replace('', 'show');
-				console.log('Testing console');
-			} else {
-				e.className = e.className.replace('show', '');
-			}
-		}
-	}
-
-	SCORE_APP.loader = {
-		//Show is een functie waar show true is
-		//Hide is een functie waar show false is, 
-		show : function(){
-			SCORE_APP.toggle.showHide('loader', true);
-		},
-		hide : function(){
-			SCORE_APP.toggle.showHide('loader', false);
-		}
 	}
 
 	/*SCORE_APP.displayLoader = function(show){
