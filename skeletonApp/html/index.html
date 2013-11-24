@@ -1,15 +1,18 @@
 <!-- BREAKDOWN
 
 Onderdelen: 
-- Game 
+- Update Game Score
 - Schedule 
 - Ranking
 
 Functionaliteiten:
-- Namespace: SCOREAPP
+- Namespace: SCORE_APP
 - Routing: Pagina herkennen # en laden
-- Templating (shit in HTML droppen) met data-bind is transparency
-- DOM ready -->
+- Transparency: (data in HTML zetten) met data-bind (templating)
+- DOM ready: Dingen uitvoeren nadat de DOM ready is
+- Promise: AJAX lib, posting en request
+- Date: Datum die in schedule staat omzetten naar normaal lezen
+-->
 
 
 <!DOCTYPE html>
@@ -21,100 +24,101 @@ Functionaliteiten:
 	
 	<body>
 
-		 <header>
+		<header>
             <h1><span>Tournament: </span>Amsterdam Ultimate Autumn</h1>
         </header>
         <nav>
             <ol>
-                <li><a href="#game">Game</a></li>
-                <li><a href="#schedule">Schedule</a></li>
                 <li><a href="#ranking">Ranking</a></li>
+                <li><a href="#schedule">Schedule</a></li>
             </ol>
         </nav>
 
-        <article>
-        	<h1></h1>
-            <header id="titleContainer">
-                <h1 data-bind="title"></h1>
-            </header>
+        <img src="../ajax-loader.gif" id="loader">
 
-            <table id="gameContainer">
-                <thead>
-                	<tr>
-	                    <th>Score</th>
-	                    <th>Team</th>
-	                    <th>Points</th>
-	                    <th>Team</th>
-	                    <th>Points</th>
-                    </tr>
-                </thead>
+        <header id="titleContainer">
+            <h1 data-bind="title"></h1>
+        </header>
 
-                <tbody id="game">
-                	<tr>
-	                    <td data-bind="score"></td>
-	                    <td data-bind="team1"></td>
-	                    <td data-bind="team1Score"></td>
-	                    <td data-bind="team2"></td>
-	                    <td data-bind="team2Score"></td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <table id="scheduleContainer">
-                <thead>
-                	 <tr>
-	                    <th>Date</th>
-	                    <th>Team</th>
-	                    <th>Result</th>
-	                    <th>Team</th>
-	                    <th>Result</th>
-                	</tr>
-                </thead>
-
-                <tbody id="schedule">
+        <section id="rankingContainer">
+            <h1 data-bind="name"></h1>
+            <table>
+	            <thead>
 	                <tr>
-	                    <td data-bind="date"></td>
-	                    <td data-bind="team1"></td>
-	                    <td data-bind="team1Score"></td>
-	                    <td data-bind="team2"></td>
-	                    <td data-bind="team2Score"></td>
-	                </tr>
-                </tbody>
-            </table>
+		                <th>Team</th>
+		                <th>Wins</th>
+		                <th>Losses</th>
+		                <th>Points won</th>
+		                <th>Points lost</th>
+		                <th>+/-</th>
+		            </tr>
+	            </thead>
 
-            <table id="rankingContainer">
-                <thead>
-                	<tr>
-	                    <th>Team</th>
-	                    <th>W</th>
-	                    <th>L</th>
-	                    <th>Points won</th>
-	                    <th>Points lost</th>
-	                    <th>+/-</th>
-	                </tr>
-                </thead>
+	            <tbody id="ranking" data-bind="standings">
+		            <tr>
+		              	<td data-bind="team">
+		                	<span data-bind="name"></span>
+		                </td>
+		                <td data-bind="wins"></td>
+		                <td data-bind="losses"></td>
+		                <td data-bind="points_scored"></td>
+		                <td data-bind="points_allowed"></td>
+		                <td data-bind="plus_minus"></td>
+		            </tr>
+	            </tbody>
+	        </table>
+        </section>
 
-                <tbody id="ranking">
+        <section id="gameContainer">
+            <form method="post" onSubmit="SCORE_APP.post.gameScore();return false;">
+                <input type="hidden" id="game_id" data-bind="id">
+                <label>
+                	<input id="team_1_score" type="text" data-bind="team_1_score" placeholder="Team 1 score">
+                </label>
+                <label>
+                	<input id="team_2_score" type="text" data-bind="team_2_score" placeholder="Team 2 score">
+                </label>
+                <input type="submit">
+            </form>
+        </section>
 
+        <section id="scheduleContainer">
+            <table>
+	            <thead>
 	                <tr>
-	                    <td data-bind="team"></td>
-	                    <td data-bind="Win"></td>
-	                    <td data-bind="Lost"></td>
-	                    <td data-bind="Sw"></td>
-	                    <td data-bind="Sl"></td>
-	                    <td data-bind="Pw"></td>
-	                    <!--<td data-bind="Pl"></td>-->
+		                <th>Date</th>
+		                <th>Team 1</th>
+		                <th>Result</th>
+		                <th>Team 2</th>
+		                <th>Update</th>
 	                </tr>
-                </tbody>
+	            </thead>
 
+	            <tbody id="schedule">
+		            <tr>
+		                <td data-bind="start_time">
+		                <td data-bind="team_1">
+		                    <span data-bind="name"></span>
+		                </td>
+		                <td> 
+		                    <span data-bind="team_1_score"></span>
+		                    <span data-bind="team_2_score"></span>
+		                </td>
+		                <td data-bind="team_2">
+                            <span data-bind="name">
+                        </td>
+                        <td><a href="" data-bind="id">Update</a></td>
+		            </tr>
+	            </tbody>
             </table>
-
-        </article>
+        </section>
 
         <script src="../js/ready.js"></script>
         <script src="../js/transparency.min.js"></script>
 		<script src="../js/routie_min.js" type="text/javascript"></script>
 		<script src="../js/score_app.js" type="text/javascript"></script>
+		<script src="../js/promise.min.js" type="text/javascript"></script>
+		<script src="../js/date.js"></script>
 
     </body>
 </html>

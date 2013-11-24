@@ -6,21 +6,60 @@ var SCORE_APP = SCORE_APP || {};
 //Niet buitenaf erin maar wel van binnenin naar buiten
 (function(){
 
+	SCORE_APP.settings = {
+		poolDataUrl : 'https://api.leaguevine.com/v1/pools/?tournament_id=19389&name=C&fields=%5Bname%2C%20standings%5D&',
+		gameScoreUrl : 'https://api.leaguevine.com/v1/games/',
+		scheduleDataUrl : 'https://api.leaguevine.com/v1/games/?tournament_id=19389&pool_id=19219&access_token=740211582f'
+	}
+
+	SCORE_APP.init = function(){
+		SCORE_APP.routing.init();
+	}
+
+	//Het post object
+    SCORE_APP.post = {
+        gameScore : function () {
+	        var data = JSON.stringify({
+	            team_1_score: document.getElementById('team_1_score').value,
+	            team_2_score: document.getElementById('team_2_score').value,
+	            is_final: 'True',
+	            game_id: document.getElementById('game_id').value
+	        });
+	        
+	        var url = "https://api.leaguevine.com/v1/game_scores/";
+	        
+	        var headers = {
+	            'Content-type':'application/json',
+	            'Accept' : 'application/json',
+	            'Authorization':'bearer 5ccf303abf'
+	        };
+	       
+	        promise.post(url, data, headers).then(function(error, text, xhr) {
+	            if (error) {
+	                alert('Error ' + xhr.status);
+	                return;
+	            }
+	            else {
+	            	document.location.href = '#schedule';
+	            }
+	        });
+    	}
+    }
+
 	//Namespace, variabele
 	//Routing zoekt pagina's achter # URL zoeken, daarvanuit pagina's laten zien
 	SCORE_APP.routing = {
 		//Toon die pagina's url's laten bestaan, kickstart door init onderaan pagina
 		init : function(){
 			routie({
-    			'game': function() {
-    				SCORE_APP.pages.showGamePage();
+    			'updateGameScore/:id': function(id) {
+    				SCORE_APP.pages.showGamePage(id);
 			    },
 			    'schedule': function() {
 			    	SCORE_APP.pages.showSchedulePage();
 			    },
-			    'ranking': function() {
+			    'ranking, *': function() {
 			    	SCORE_APP.pages.showRankingPage();
-
 			    }
 			});
 		}
@@ -28,24 +67,49 @@ var SCORE_APP = SCORE_APP || {};
 
 	//Object aanmaken met daarbinnen functies
 	SCORE_APP.pages = {
-		showGamePage : function(){
+		showGamePage : function(id){
 			SCORE_APP.pages.hideAllPages();
 			//html erin renderen met transparency
-			Transparency.render(document.getElementById('game'), SCORE_APP.data.game.tabledata);
-			Transparency.render(document.getElementById('titleContainer'), SCORE_APP.data.game.title);
-			(document.getElementById('gameContainer')).style.display = "block" ;
+			SCORE_APP.data.getGameData( id, function(gameScore){
+				Transparency.render(document.getElementById('gameContainer'), gameScore);
+                (document.getElementById('gameContainer')).style.display = 'block' ;
+            });
 		},
 
 		showSchedulePage : function(){
 			SCORE_APP.pages.hideAllPages();
-			Transparency.render(document.getElementById('schedule'), SCORE_APP.data.schedule.tabledata);
-			(document.getElementById('scheduleContainer')).style.display = "block" ;
+
+			SCORE_APP.data.getScheduleData( function(scheduleData) {
+                (document.getElementById('scheduleContainer')).style.display = 'block' ;
+
+                var directives = {
+                id: {
+                	text: function(params){
+                        return "Update score"
+                    },
+                    href: function(params) {
+                        return "#updateGameScore/" + this.id;
+                        }
+                    },
+
+                    start_time: {
+                        text: function(params){
+                            return new Date(this.start_time).toString("dddd d MMMM HH:mm"); 
+                            }
+                        }
+                    };
+
+                Transparency.render(document.getElementById('scheduleContainer'), scheduleData, directives);
+            });
 		},
 
 		showRankingPage : function(){
 			SCORE_APP.pages.hideAllPages();
-			Transparency.render(document.getElementById('ranking'), SCORE_APP.data.ranking.tabledata);
-			(document.getElementById('rankingContainer')).style.display = "block" ;
+
+			SCORE_APP.data.getPoolData( function(poolData){
+				Transparency.render(document.getElementById('rankingContainer'), poolData);
+				(document.getElementById('rankingContainer')).style.display = "block" ;
+			});
 		},
 
 		hideAllPages : function(){
@@ -57,63 +121,89 @@ var SCORE_APP = SCORE_APP || {};
 
 	//Object data aanmaken
 	SCORE_APP.data = {
-		game :  {
-			title : "Pool A - Score: Boomsquad vs. Burning Snow",
-			tabledata : [
-		    { score: "1", team1: "Boomsquad", team1Score: "1", team2: "Burning Snow", team2Score: "0"},
-		    { score: "2", team1: "Boomsquad", team1Score: "2", team2: "Burning Snow", team2Score: "0"},
-		    { score: "3", team1: "Boomsquad", team1Score: "2", team2: "Burning Snow", team2Score: "1"},
-		    { score: "4", team1: "Boomsquad", team1Score: "2", team2: "Burning Snow", team2Score: "2"},
-		    { score: "5", team1: "Boomsquad", team1Score: "3", team2: "Burning Snow", team2Score: "2"},
-		    { score: "6", team1: "Boomsquad", team1Score: "4", team2: "Burning Snow", team2Score: "2"},
-		    { score: "7", team1: "Boomsquad", team1Score: "5", team2: "Burning Snow", team2Score: "2"},
-		    { score: "8", team1: "Boomsquad", team1Score: "5", team2: "Burning Snow", team2Score: "3"},
-		    { score: "9", team1: "Boomsquad", team1Score: "6", team2: "Burning Snow", team2Score: "3"},
-		    { score: "10", team1: "Boomsquad", team1Score: "7", team2: "Burning Snow", team2Score: "3"},
-		    { score: "11", team1: "Boomsquad", team1Score: "7", team2: "Burning Snow", team2Score: "4"},
-		    { score: "12", team1: "Boomsquad", team1Score: "8", team2: "Burning Snow", team2Score: "4"},
-		    { score: "13", team1: "Boomsquad", team1Score: "8", team2: "Burning Snow", team2Score: "5"},
-		    { score: "14", team1: "Boomsquad", team1Score: "8", team2: "Burning Snow", team2Score: "6"},
-		    { score: "15", team1: "Boomsquad", team1Score: "9", team2: "Burning Snow", team2Score: "6"},
-		    { score: "16", team1: "Boomsquad", team1Score: "9", team2: "Burning Snow", team2Score: "7"},
-		    { score: "17", team1: "Boomsquad", team1Score: "10", team2: "Burning Snow", team2Score: "7"},
-		    { score: "18", team1: "Boomsquad", team1Score: "11", team2: "Burning Snow", team2Score: "7"},
-		    { score: "19", team1: "Boomsquad", team1Score: "12", team2: "Burning Snow", team2Score: "7"},
-		    { score: "20", team1: "Boomsquad", team1Score: "13", team2: "Burning Snow", team2Score: "7"},
-		    { score: "21", team1: "Boomsquad", team1Score: "14", team2: "Burning Snow", team2Score: "7"},
-		    { score: "22", team1: "Boomsquad", team1Score: "14", team2: "Burning Snow", team2Score: "8"},
-		    { score: "23", team1: "Boomsquad", team1Score: "15", team2: "Burning Snow", team2Score: "8"}
-   		]},
+		getPoolData: function(callback){
+			//GET haalt URL op THEN, (als het geladen is: doet dit) is response, reactie van de server (callback)
+			promise.get(SCORE_APP.settings.poolDataUrl).then(function(error, text, xhr) {
+    			if (error) {
+        			alert('Error ' + xhr.status);
+        			return;
+    			}
 
-   		schedule : {
-   		title : "Pool A - Schedule",
-   		tabledata : [
-		    { date: "Monday, 9:00am", team1: "Chasing", team1Score: "13", team2: "Amsterdam Money Gang", team2Score: "9"},
-		    { date: "Monday, 9:00am", team1: "Boomsquad", team1Score: "15", team2: "Beast Amsterdam", team2Score: "11"},
-		    { date: "Monday, 10:00am", team1: "Beast Amsterdam", team1Score: "14", team2: "Amsterdam Money Gang", team2Score: "12"},
-		    { date: "Monday, 10:00am", team1: "Chasing", team1Score: "5", team2: "Burning Snow", team2Score: "15"},
-		    { date: "Monday, 11:00am", team1: "Boomsquad", team1Score: "11", team2: "Amsterdam Money Gang", team2Score: "15"},    
-		    { date: "Monday, 11:00am", team1: "Burning Snow", team1Score: "15", team2: "Beast Amsterdam", team2Score: "6"},
-		    { date: "Monday, 12:00pm", team1: "Chasing", team1Score: "8", team2: "Beast Amsterdam", team2Score: "15"},
-		    { date: "Monday, 12:00pm", team1: "Boomsquad", team1Score: "15", team2: "Burning Snow", team2Score: "8"},
-		    { date: "Monday, 1:00pm", team1: "Chasing", team1Score: "15", team2: "Boomsquad", team2Score: "14"},
-		    { date: "Monday, 1:00pm", team1: "Burning Snow", team1Score: "15", team2: "Amsterdam Money Gang", team2Score: "11"}
-    	]},
+    			//In deze variable staat alle informatie die we hebben teruggekregen van promise (maar dan netjes), niet in een string maar als objecten
+    			var json = JSON.parse(text);
+    			
+    			callback(json.objects[0]);
 
-    	ranking : {
-    		title : "Pool A - Ranking",
-    		tabledata : [
-		    { team: "Chasing", Win: "2", Lost: "2", Sw: "7", Sl: "9", Pw: "35", Pl: "39"},
-		    { team: "Boomsquad", Win: "2", Lost: "2", Sw: "9", Sl: "8", Pw: "36", Pl: "34"},
-		    { team: "Burning Snow", Win: "3", Lost: "1", Sw: "11", Sl: "4", Pw: "36", Pl: "23"},
-		    { team: "Beast Amsterdam", Win: "2", Lost: "2", Sw: "6", Sl: "8", Pw: "30", Pl: "34"},
-		    { team: "Amsterdam Money Gang", Win: "1", Lost: "3", Sw: "6", Sl: "10", Pw: "30", Pl: "37"}
-    	]}
+    			//alert('The page contains ' + text.length + ' character(s).');
+			});
+		},
+
+		getScheduleData : function(callback){
+			promise.get(SCORE_APP.settings.scheduleDataUrl).then(function(error, text, xhr) {
+                if (error) {
+                    alert('Error ' + xhr.status);
+                return;
+                }
+
+                var json = JSON.parse(text);
+             
+                callback(json.objects);
+            });
+        },
+
+        getGameData : function(id, callback){
+			promise.get(SCORE_APP.settings.gameScoreUrl + id + "/").then(function(error, text, xhr) {
+                if (error) {
+                    alert('Error ' + xhr.status);
+                return;
+                }
+
+                var json = JSON.parse(text);
+
+                callback(json);
+            });
+        },
 	}
+
+	SCORE_APP.toggle = {
+		//elementId = string, show = true/false
+		showHide : function (elementId, show){
+			//Element in variabele opslaan
+			var e = document.getElementById(elementId);
+			//De toggle functie. Als show true is, replace de className '' met de class show 
+			//Als how false is, replace dan class show met '' (spatie)
+			if (show) {
+				e.className = e.className.replace('', 'show');
+				console.log('Testing console');
+			} else {
+				e.className = e.className.replace('show', '');
+			}
+		}
+	}
+
+	SCORE_APP.loader = {
+		//Show is een functie waar show true is
+		//Hide is een functie waar show false is, 
+		show : function(){
+			SCORE_APP.toggle.showHide('loader', true);
+		},
+		hide : function(){
+			SCORE_APP.toggle.showHide('loader', false);
+		}
+	}
+
+	/*SCORE_APP.displayLoader = function(show){
+		if(show){
+			(document.getElementById("loader")).style.display = 'block';
+		}
+		else {
+			(document.getElementById("loader")).style.display = 'none';
+		}
+	}*/
 
 	domready(function(){
 		//Kickstart routie
-		SCORE_APP.routing.init();
+		SCORE_APP.init();
 	});
 
 
