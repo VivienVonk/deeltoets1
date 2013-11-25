@@ -31,7 +31,7 @@ var SCORE_APP = SCORE_APP || {};
 	        var headers = {
 	            'Content-type':'application/json',
 	            'Accept' : 'application/json',
-	            'Authorization':'bearer 5ccf303abf'
+	            'Authorization':'bearer 00db45dfd4'
 	        };
 	       
 	        promise.post(url, data, headers).then(function(error, text, xhr) {
@@ -122,7 +122,6 @@ var SCORE_APP = SCORE_APP || {};
 
 			SCORE_APP.data.getScheduleData( function(scheduleData) {
                 SCORE_APP.toggle.showHide('scheduleContainer', true);
-
                 var directives = {
                 id: {
                 	text: function(params){
@@ -132,14 +131,12 @@ var SCORE_APP = SCORE_APP || {};
                         return "#updateGameScore/" + this.id;
                         }
                     },
-
                     start_time: {
                         text: function(params){
                             return new Date(this.start_time).toString("dddd d MMMM HH:mm"); 
                             }
                         }
                     };
-
                 Transparency.render(document.getElementById('scheduleContainer'), scheduleData, directives);
                 SCORE_APP.loader.hide();
             });
@@ -147,7 +144,6 @@ var SCORE_APP = SCORE_APP || {};
 
 		showRankingPage : function(){
 			SCORE_APP.pages.hideAllPages();
-
 			SCORE_APP.data.getPoolData( function(poolData){
 				SCORE_APP.toggle.showHide('rankingContainer', true);
 				Transparency.render(document.getElementById('rankingContainer'), poolData);
@@ -222,7 +218,7 @@ var SCORE_APP = SCORE_APP || {};
 	}*/
 
 	domready(function(){
-		//Kickstart routie
+		//Kickstart
 		SCORE_APP.init();
 	});
 

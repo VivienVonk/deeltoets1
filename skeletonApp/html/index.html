@@ -1,117 +1,111 @@
-<!-- BREAKDOWN
-
-Onderdelen: 
-- Update Game Score
-- Schedule 
-- Ranking
-
-Functionaliteiten:
-- Namespace: SCORE_APP
-- Routing: Pagina herkennen # en laden
-- Transparency: (data in HTML zetten) met data-bind (templating)
-- DOM ready: Dingen uitvoeren nadat de DOM ready is
-- Promise: AJAX lib, posting en request
-- Date: Datum die in schedule staat omzetten naar normaal lezen
--->
-
-
 <!DOCTYPE html>
 <html>
 	<head>
 		<title>Web App Skeleton v 0.3</title>
 		<link href="../css/style.css" media="screen" rel="stylesheet" type="text/css" />
+		<link href="../css/refresh.css" media="screen" rel="stylesheet" type="text/css" />
+		<meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
+    	<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+		<link href='http://fonts.googleapis.com/css?family=Ubuntu:300,400,500,700' rel='stylesheet' type='text/css'>
 	</head>
-	
 	<body>
+		<div id="container">
+			<div id="pullrefresh">
+        		<div class="message">
+            		<div id="pullrefresh-icon" class="icon arrow arrow-down"></div>
+            		<span></span>
+        		</div>
+    		</div>
 
-		<header>
-            <h1><span>Tournament: </span>Amsterdam Ultimate Autumn</h1>
-        </header>
-        <nav>
-            <ol>
-                <li><a href="#ranking" id="rankingActive">Ranking</a></li>
-                <li><a href="#schedule" id="scheduleActive">Schedule</a></li>
-            </ol>
-        </nav>
+			<header>
+	            <h1><span>Tournament: </span>Amsterdam Ultimate Autumn</h1>
+	        </header>
+	        <nav>
+	            <ul>
+	                <li><a href="#ranking" id="rankingActive">Ranking</a></li>
+	                <li><a href="#schedule" id="scheduleActive">Schedule</a></li>
+	            </ul>
+	        </nav>
+	        
+	        <img src="../ajax-loader.gif" id="loader" class="loader">
 
-        <img src="../ajax-loader.gif" id="loader">
+	        <header id="titleContainer">
+	            <h1 data-bind="title"></h1>
+	        </header>
 
-        <header id="titleContainer">
-            <h1 data-bind="title"></h1>
-        </header>
+	        <section id="rankingContainer" class="rankingContainer">
+	            <h1 data-bind="name"></h1>
+	            <div class="rankingContainerWrapper" id="ranking" data-bind="standings">
+	            	<div class="rankingContainerContent">
+			        	<div class="winningTeam">
+			        		<h2 data-bind="team">Team
+			        			<span data-bind="name"></span>
+			        		</h2>
+			        	</div>
+			        	<div class="firstRow">
+			        		<li>Wins</li>
+			        		<li>Losses</li>
+			        	</div>
+			        	<div class="resultsFirst">
+			        		<li data-bind="wins"></li>
+			        		<li data-bind="losses"></li>
+			        	</div>
+			        	<div class="secondRow">
+			        		<li>Points won</li>
+			        		<li>Points lost</li>
+			        		<li>+/-</li>
+			        	</div>
+			        	<div class="resultsSecond">
+			        		<li data-bind="points_scored"></li>
+			        		<li data-bind="points_allowed"></li>
+			        		<li data-bind="plus_minus"></li>
+			        	</div>
+			        </div>	
+		        </div>
+	        </section>
 
-        <section id="rankingContainer">
-            <h1 data-bind="name"></h1>
-            <table>
-	            <thead>
-	                <tr>
-		                <th>Team</th>
-		                <th>Wins</th>
-		                <th>Losses</th>
-		                <th>Points won</th>
-		                <th>Points lost</th>
-		                <th>+/-</th>
-		            </tr>
-	            </thead>
+	        <section id="gameContainer" class="gameContainer">
+	            <form method="post" onSubmit="SCORE_APP.post.gameScore();return false;">
+	                <input type="hidden" id="game_id" data-bind="id">
+	                <label class="inputFields">
+	                	<h3>Team 1 Score</h3>
+	                	<input id="team_1_score" type="text" data-bind="team_1_score" placeholder="Team 1 score">
+	                </label>
+	                <label class="inputFields">
+	                	<h3>Team 2 Score</h3>
+	                	<input id="team_2_score" type="text" data-bind="team_2_score" placeholder="Team 2 score">
+	                </label>
+	                <input type="submit" id="submitScoreButton">
+	            </form>
+	        </section>
 
-	            <tbody id="ranking" data-bind="standings">
-		            <tr>
-		              	<td data-bind="team">
-		                	<span data-bind="name"></span>
-		                </td>
-		                <td data-bind="wins"></td>
-		                <td data-bind="losses"></td>
-		                <td data-bind="points_scored"></td>
-		                <td data-bind="points_allowed"></td>
-		                <td data-bind="plus_minus"></td>
-		            </tr>
-	            </tbody>
-	        </table>
-        </section>
-
-        <section id="gameContainer">
-            <form method="post" onSubmit="SCORE_APP.post.gameScore();return false;">
-                <input type="hidden" id="game_id" data-bind="id">
-                <label>
-                	<input id="team_1_score" type="text" data-bind="team_1_score" placeholder="Team 1 score">
-                </label>
-                <label>
-                	<input id="team_2_score" type="text" data-bind="team_2_score" placeholder="Team 2 score">
-                </label>
-                <input type="submit">
-            </form>
-        </section>
-
-        <section id="scheduleContainer">
-            <table>
-	            <thead>
-	                <tr>
-		                <th>Date</th>
-		                <th>Team 1</th>
-		                <th>Result</th>
-		                <th>Team 2</th>
-		                <th>Update</th>
-	                </tr>
-	            </thead>
-
-	            <tbody id="schedule">
-		            <tr>
-		                <td data-bind="start_time">
-		                <td data-bind="team_1">
-		                    <span data-bind="name"></span>
-		                </td>
-		                <td> 
-		                    <span data-bind="team_1_score"></span>
-		                    <span data-bind="team_2_score"></span>
-		                </td>
-		                <td data-bind="team_2">
-                            <span data-bind="name">
-                        </td>
-                        <td><a href="" data-bind="id">Update</a></td>
-		            </tr>
-	            </tbody>
-            </table>
-        </section>
+	        <section id="scheduleContainer" class="scheduleContainer">
+		        <div class="scheduleContainerContent">
+		        	<div class="date">
+		        		<h2 data-bind="start_time">Date</h2>
+		        	</div>
+		        	<div class="resultHeader">
+		        		<li>Team 1</li>
+		        		<li>Result</li>
+		        		<li>Team 2</li>
+		        		<div class="resultContent">
+			        		<li data-bind="team_1">
+			        			<span data-bind="name"></span>
+			        		</li>
+			        		<li>
+			        			<span data-bind="team_1_score"></span>
+			        			<span data-bind="team_2_score"></span>
+			        		</li>
+			        		<li data-bind="team_2">
+			        			<span data-bind="name">
+			        		</li>
+			        		<div class="clear"></div>
+		        		</div>
+		        		<a href="" data-bind="id" id="updateButton">Update</a>
+		        	</div>
+		        </div>
+	        </section>
+        </div>
 
         <script src="../js/ready.js"></script>
         <script src="../js/transparency.min.js"></script>
@@ -119,6 +113,10 @@ Functionaliteiten:
 		<script src="../js/score_app.js" type="text/javascript"></script>
 		<script src="../js/promise.min.js" type="text/javascript"></script>
 		<script src="../js/date.js"></script>
+		<script src="../js/hammer.js"></script>
+		<script src="../js/modernizr.js"></script>
+		<script src="../js/pullToRefresh.js"></script>
+		<script src="../js/ga.js"></script>
 
     </body>
 </html>
